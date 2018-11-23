@@ -1,3 +1,3 @@
-# UnityServer-GitHub
+# Youtube Sync Player
 
-Personal Project- Unity dedicated server
+Personal Project - Youtube Sync Player: React, Youtube API
