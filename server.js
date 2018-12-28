@@ -1,28 +1,17 @@
-var fs = require("fs");
-var express = require("express");
 var http = require("http");
-var socketIO = require("socket.io");
 
-// our localhost port
-var port = 4001;
-
+var express = require("express");
 var app = express();
+var server = http.createServer(app);
 
-var option = {
-  key: fs.readFileSync("./file.pem"),
-  cert: fs.readFileSync("./file.crt")
-};
+var io = (module.exports.io = require("socket.io")(server));
 
-// our server instance
-var server = http.createServer(option, app);
-
-// This creates our socket using the instance of the server
-var io = socketIO(server);
+const PORT = process.env.PORT || 4001;
+const SocketManager = require("./server/SocketManager");
 
 // This is what the socket.io syntax is like, we will work this later
-io.on("connection", socket => {
-  console.log("New user connected");
-
+io.on("connection", SocketManager);
+/*
   socket.on("change color", color => {
     console.log("Color Changed to: ", color);
     io.sockets.emit("change color", color);
@@ -43,7 +32,6 @@ io.on("connection", socket => {
   // disconnect is fired when a client leaves the server
   socket.on("disconnect", () => {
     console.log("user disconnected");
-  });
-});
+  });*/
 
-server.listen(port, () => console.log(`Listening on port ${port}`));
+server.listen(PORT, () => console.log(`Listening on port ${PORT}`));
