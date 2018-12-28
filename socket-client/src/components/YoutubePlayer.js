@@ -10,18 +10,14 @@ class YoutubePlayer extends Component {
     super();
 
     this.state = {
-      endpoint: "http://127.0.0.1:4001",
-
+      endpoint: "http://localhost:4001",
       videoId: null,
       player: null,
-      playState: null
+      playState: null,
+      muteButton: "Mute"
     };
 
     this.onReady = this.onReady.bind(this);
-    //this.onChangeVideo = this.onChangeVideo.bind(this);
-    //this.onPlayVideo = this.onPlayVideo.bind(this);
-    //this.onPauseVideo = this.onPauseVideo.bind(this);
-    //this.MuteVideo = this.MuteVideo.bind(this);
 
     console.log("Youtube Player: " + this.state.playState);
   }
@@ -46,11 +42,13 @@ class YoutubePlayer extends Component {
     console.log("Play State: " + playState);
   };
 
-  setVideoID = videoID => {
-    this.setState({ videoID }, () => {
+  setVideoID = () => {
+    let idToSet = this.state.videoId ? videoIdA : videoIdB;
+    console.log(idToSet);
+    this.setState({ idToSet }, () => {
       this.sendVideoId();
     });
-    console.log("Set Video Id: " + videoID);
+    console.log("Set Video Id: " + this.state.videoId);
   };
 
   componentDidMount() {
@@ -58,8 +56,6 @@ class YoutubePlayer extends Component {
     const socket = socketIOClient(endpoint);
 
     socket.on("PlayState", playState => {
-      console.log("YoutubePlayer.js componentDidMount: " + playState);
-
       switch (playState) {
         case "Play":
           this.onPlayVideo();
@@ -69,6 +65,9 @@ class YoutubePlayer extends Component {
           break;
         case "Mute":
           this.MuteVideo();
+          break;
+        case "ChangeVideo":
+          this.onChangeVideo();
           break;
         default:
           console.log("PlayState Error. Please try again.");
@@ -111,16 +110,20 @@ class YoutubePlayer extends Component {
   MuteVideo() {
     if (this.state.player.isMuted()) {
       this.state.player.unMute();
+      this.setState({ muteButton: "Mute" });
     } else {
       this.state.player.mute();
+      this.setState({ muteButton: "Unmute" });
     }
   }
 
-  onChangeVideo(videoId) {
-    if (videoId === videoIdA) {
-      this.setState.videoID = videoIdB;
-    } else if (videoId === videoIdB) {
-      this.setState.videoID = videoIdA;
+  onChangeVideo() {
+    if (this.state.videoId === videoIdA) {
+      this.setState.videoId = videoIdB;
+      console.log(this.setState.videoId + " :: " + videoIdB);
+    } else if (this.state.videoId === videoIdB) {
+      this.setState.videoId = videoIdA;
+      console.log(this.setState.videoId + " :: " + videoIdA);
     }
   }
 
@@ -131,10 +134,12 @@ class YoutubePlayer extends Component {
         <br />
         <button onClick={() => this.setPlayState("Play")}>Play</button>
         <button onClick={() => this.setPlayState("Pause")}>Pause</button>
-        <button onClick={() => this.setVideoID(this.state.videoId)}>
+        <button onClick={() => this.setPlayState("ChangeVideo")}>
           Change Video
         </button>
-        <button onClick={() => this.setPlayState("Mute")}>Mute</button>
+        <button onClick={() => this.setPlayState("Mute")}>
+          {this.state.muteButton}
+        </button>
       </div>
     );
   }
