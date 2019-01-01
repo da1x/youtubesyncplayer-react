@@ -25,6 +25,10 @@ export default class YoutubePlayer extends Component {
     socket.on(PLAY_STATE, videoState => {
       this.ChangePlayState(videoState);
     });
+
+    socket.on(VIDEO_ID, videoIdFromServer => {
+      this.setState({ videoId: videoIdFromServer });
+    });
   }
 
   //Youtube function
@@ -93,10 +97,15 @@ export default class YoutubePlayer extends Component {
 
   onChangeVideo = () => {
     const { videoId } = this.state;
+    const { socket } = this.props;
     if (videoId === videoIdA) {
-      this.setState.videoId = videoIdB;
+      this.setState({ videoId: videoIdB }, () => {
+        socket.emit(VIDEO_ID, videoIdB);
+      });
     } else if (videoId === videoIdB) {
-      this.setState.videoId = videoIdA;
+      this.setState({ videoId: videoIdA }, () => {
+        socket.emit(VIDEO_ID, videoIdA);
+      });
     }
   };
 

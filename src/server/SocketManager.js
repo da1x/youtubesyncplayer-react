@@ -58,7 +58,7 @@ module.exports = function(socket) {
     }
   });
 
-  //User logsout
+  //User logout
   socket.on(LOGOUT, () => {
     connectedUsers = removeUser(connectedUsers, socket.user.name);
     io.emit(USER_DISCONNECTED, connectedUsers);
@@ -82,6 +82,11 @@ module.exports = function(socket) {
   socket.on(PLAY_STATE, videoState => {
     io.emit(PLAY_STATE, videoState);
     console.log("From socketManager " + videoState);
+  });
+
+  socket.on(VIDEO_ID, videoId => {
+    io.emit(VIDEO_ID, videoId);
+    console.log("From socketManager " + videoId);
   });
 };
 /*
