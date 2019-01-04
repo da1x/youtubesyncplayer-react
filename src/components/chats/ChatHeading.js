@@ -16,7 +16,7 @@ export default function({ name, numberOfUsers }) {
       <div className="options">
         {/*	<FAVideo />
 				<FAUserPlus />
-			<MdEllipsisMenu />*/}
+      <MdEllipsisMenu />*/}
       </div>
     </div>
   );

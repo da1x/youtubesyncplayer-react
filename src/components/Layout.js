@@ -62,6 +62,7 @@ export default class Layout extends Component {
         ) : (
           <div>
             <YoutubePlayer socket={socket} />
+            <br />
             <ChatContainer socket={socket} user={user} logout={this.logout} />
           </div>
         )}

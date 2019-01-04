@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { PLAY_STATE, VIDEO_ID } from "../../Events";
+import { PLAY_STATE, VIDEO_ID, MUTE_STATE } from "../../Events";
 import YouTube from "react-youtube";
 
 const videoIdA = "IHNzOHi8sJs";
@@ -10,7 +10,7 @@ export default class YoutubePlayer extends Component {
     super(props);
 
     this.state = {
-      videoId: null,
+      videoId: videoIdA,
       player: null,
       playState: null,
       muteButton: "Mute"
@@ -22,13 +22,31 @@ export default class YoutubePlayer extends Component {
 
   componentDidMount() {
     const { socket } = this.props;
+    const { player } = this.state;
     socket.on(PLAY_STATE, videoState => {
       this.ChangePlayState(videoState);
     });
 
-    socket.on(VIDEO_ID, videoIdFromServer => {
-      this.setState({ videoId: videoIdFromServer });
+    socket.on(MUTE_STATE, muteState => {
+      this.ChangeMuteState(muteState);
     });
+
+    socket.on(VIDEO_ID, videoIdFromServer => {
+      this.setState({
+        videoId: videoIdFromServer
+      });
+    });
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const { playState } = this.state;
+    const { socket } = this.props;
+
+    //Check if play state changed
+    if (playState !== prevState.playState) {
+      socket.emit(PLAY_STATE, playState);
+      console.log(playState);
+    }
   }
 
   //Youtube function
@@ -39,18 +57,12 @@ export default class YoutubePlayer extends Component {
       }" has been saved to state.`
     ); // eslint-disable-line
     this.setState({
-      player: event.target,
-      videoId: videoIdA
+      player: event.target
     });
   };
 
   handlePlayState = videoState => {
-    const { socket } = this.props;
-    const { playState } = this.state;
-    this.setState({ playState: videoState }, () => {
-      socket.emit(PLAY_STATE, playState);
-      console.log(playState);
-    });
+    this.setState({ playState: videoState });
   };
 
   ChangePlayState = videoState => {
@@ -64,12 +76,18 @@ export default class YoutubePlayer extends Component {
       case "Mute":
         this.MuteVideo();
         break;
-      case "ChangeVideo":
-        this.onChangeVideo();
-        break;
       default:
         console.log("PlayState Error. Please try again.");
         break;
+    }
+  };
+
+  ChangeMuteState = muteState => {
+    const { player } = this.state;
+    if (muteState === "Mute") {
+      player.unMute();
+    } else if (muteState === "Unmute") {
+      player.mute();
     }
   };
 
@@ -85,13 +103,18 @@ export default class YoutubePlayer extends Component {
   };
 
   MuteVideo = () => {
-    const { player } = this.state;
+    const { socket } = this.props;
+    const { player, muteButton } = this.state;
     if (player.isMuted()) {
       player.unMute();
-      this.setState({ muteButton: "Mute" });
+      this.setState({ muteButton: "Unmute" }, () => {
+        socket.emit(MUTE_STATE, muteButton);
+      });
     } else {
       player.mute();
-      this.setState({ muteButton: "Unmute" });
+      this.setState({ muteButton: "Mute" }, () => {
+        socket.emit(MUTE_STATE, muteButton);
+      });
     }
   };
 
@@ -111,18 +134,40 @@ export default class YoutubePlayer extends Component {
 
   render() {
     const { videoId, muteButton } = this.state;
+    const opts = { playerVars: { showinfo: 0, controls: 0, autohide: 1 } };
+    //autoplay: 1
     return (
       <div>
-        <YouTube videoId={videoId} onReady={this.onReady} />
+        <div className="youtube">
+          <YouTube videoId={videoId} opts={opts} onReady={this.onReady} />
+        </div>
         <br />
-        <button onClick={() => this.handlePlayState("Play")}>Play</button>
-        <button onClick={() => this.handlePlayState("Pause")}>Pause</button>
-        <button onClick={() => this.handlePlayState("ChangeVideo")}>
-          Change Video
-        </button>
-        <button onClick={() => this.handlePlayState("Mute")}>
-          {muteButton}
-        </button>
+        <div className="youtube-container-button">
+          <button
+            className="buttonName"
+            onClick={() => this.handlePlayState("Play")}
+          >
+            Play
+          </button>
+          <button
+            className="buttonName"
+            onClick={() => this.handlePlayState("Pause")}
+          >
+            Pause
+          </button>
+          <button
+            className="buttonName"
+            onClick={() => this.handlePlayState("ChangeVideo")}
+          >
+            Change Video
+          </button>
+          <button
+            className="buttonName"
+            onClick={() => this.ChangePlayState("Mute")}
+          >
+            {muteButton}
+          </button>
+        </div>
       </div>
     );
   }
