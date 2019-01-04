@@ -1,11 +1,11 @@
-Personal Project
-Youtube Sync Player with Chat
+##Personal Project
+#Youtube Sync Player with Chat
 
-Usage:
+#Usage:
 npm install
 npm start
 
-Used:
+#Used:
 Node Js
 Express
 Socket.io

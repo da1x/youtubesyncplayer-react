@@ -10,7 +10,8 @@ const {
   MESSAGE_SENT,
   TYPING,
   PLAY_STATE,
-  VIDEO_ID
+  VIDEO_ID,
+  MUTE_STATE
 } = require("../Events");
 
 const { createUser, createMessage, createChat } = require("../Factories");
@@ -87,6 +88,11 @@ module.exports = function(socket) {
   socket.on(VIDEO_ID, videoId => {
     io.emit(VIDEO_ID, videoId);
     console.log("From socketManager " + videoId);
+  });
+
+  socket.on(MUTE_STATE, muteState => {
+    io.emit(MUTE_STATE, muteState);
+    console.log("From socketManager " + muteState);
   });
 };
 /*
