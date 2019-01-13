@@ -21,7 +21,6 @@ let connectedUsers = {};
 let communityChat = createChat();
 
 module.exports = function(socket) {
-  // console.log('\x1bc'); //clears console
   console.log("Socket Id:" + socket.id);
 
   let sendMessageToChatFromUser;
@@ -79,40 +78,33 @@ module.exports = function(socket) {
     sendTypingFromUser(chatId, isTyping);
   });
 
-  // Youtube Player
-  socket.on(PLAY_STATE, videoState => {
-    io.emit(PLAY_STATE, videoState);
-    console.log("From socketManager " + videoState);
+  // Youtube Player Sockets
+  // Play/Pause
+  socket.on(PLAY_STATE, isPlaying => {
+    io.emit(PLAY_STATE, isPlaying);
+    console.log("SocketManager - isPlaying: " + isPlaying);
   });
 
-  socket.on(VIDEO_ID, videoId => {
-    io.emit(VIDEO_ID, videoId);
-    console.log("From socketManager " + videoId);
+  // Current video id
+  socket.on(VIDEO_ID, videoIndex => {
+    io.emit(VIDEO_ID, videoIndex);
+    console.log("SocketManager - videoIndex" + videoIndex);
   });
 
-  socket.on(MUTE_STATE, muteState => {
-    io.emit(MUTE_STATE, muteState);
-    console.log("From socketManager " + muteState);
+  // Mute/Unmute state
+  socket.on(MUTE_STATE, isMuted => {
+    io.emit(MUTE_STATE, isMuted);
+    console.log("SocketManager - isMuted: " + isMuted);
   });
 };
-/*
- * Returns a function that will take a chat id and a boolean isTyping
- * and then emit a broadcast to the chat id that the sender is typing
- * @param sender {string} username of sender
- * @return function(chatId, message)
- */
+
+// Server side functions
 function sendTypingToChat(user) {
   return (chatId, isTyping) => {
     io.emit(`${TYPING}-${chatId}`, { user, isTyping });
   };
 }
 
-/*
- * Returns a function that will take a chat id and message
- * and then emit a broadcast to the chat id.
- * @param sender {string} username of sender
- * @return function(chatId, message)
- */
 function sendMessageToChat(sender) {
   return (chatId, message) => {
     io.emit(
@@ -122,36 +114,18 @@ function sendMessageToChat(sender) {
   };
 }
 
-/*
- * Adds user to list passed in.
- * @param userList {Object} Object with key value pairs of users
- * @param user {User} the user to added to the list.
- * @return userList {Object} Object with key value pairs of Users
- */
 function addUser(userList, user) {
   let newList = Object.assign({}, userList);
   newList[user.name] = user;
   return newList;
 }
 
-/*
- * Removes user from the list passed in.
- * @param userList {Object} Object with key value pairs of Users
- * @param username {string} name of user to be removed
- * @return userList {Object} Object with key value pairs of Users
- */
 function removeUser(userList, username) {
   let newList = Object.assign({}, userList);
   delete newList[username];
   return newList;
 }
 
-/*
- * Checks if the user is in list passed in.
- * @param userList {Object} Object with key value pairs of Users
- * @param username {String}
- * @return userList {Object} Object with key value pairs of Users
- */
 function isUser(userList, username) {
   return username in userList;
 }
