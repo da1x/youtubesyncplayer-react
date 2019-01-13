@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { PLAY_STATE, VIDEO_ID, MUTE_STATE } from "../../Events";
 import YouTube from "react-youtube";
 
+// Hard coded 2 different youtube video id
 const videoIdA = "IHNzOHi8sJs";
 const videoIdB = "nVS7p4TqF3E";
 
@@ -11,7 +12,7 @@ export default class YoutubePlayer extends Component {
 
     this.state = {
       videoId: [videoIdA, videoIdB],
-      videoIdIndex: 0,
+      videoIdIndex: 1,
       player: null,
       isMuted: false,
       isPlaying: false
@@ -19,18 +20,13 @@ export default class YoutubePlayer extends Component {
   }
   // Init Youtube player
   onReady = event => {
-    console.log(
-      `YouTube Player object for videoId: "${
-        this.state.videoId[0]
-      }" has been saved to state.`
-    ); // eslint-disable-line
+    console.log("Youtube player ready.");
     this.setState({ player: event.target });
   };
 
-  // Life cycle component
+  // Life cycle component - listens to server boardcast
   componentDidMount() {
     const { socket } = this.props;
-    const { videoId } = this.state;
     socket.on(PLAY_STATE, isPlaying => {
       this.setState({ isPlaying: !isPlaying });
       console.log("Youtube Component - isPlaying: " + isPlaying);
@@ -38,8 +34,6 @@ export default class YoutubePlayer extends Component {
     });
 
     socket.on(VIDEO_ID, videoIdIndex => {
-      //this.setState({ videoId: videoId[videoIdIndex] });
-      console.log("Youtube Component - videoId: " + videoIdIndex);
       this.changeVideoFunction(videoIdIndex);
     });
 
@@ -49,6 +43,7 @@ export default class YoutubePlayer extends Component {
       this.muteFunction(isMuted);
     });
   }
+  //--------------------
 
   // Play/Pause Function
   handlePlayButton = prevState => {
@@ -66,14 +61,16 @@ export default class YoutubePlayer extends Component {
   //--------------------
 
   // Change Video
-  handleChangeVideoButton = prevState => {
-    const { videoId, videoIdIndex } = this.state;
+  handleChangeVideoButton = () => {
+    const { videoIdIndex } = this.state;
     const { socket } = this.props;
-    // TODO: Find out the index at state and pass it to socket emit
+
     if (videoIdIndex !== 1) {
       this.setState({ videoIdIndex: 1 });
+      console.log("1");
     } else {
       this.setState({ videoIdIndex: 0 });
+      console.log("0");
     }
 
     // Send Video index to server
@@ -82,10 +79,8 @@ export default class YoutubePlayer extends Component {
 
   changeVideoFunction = videoIdIndex => {
     const { player, videoId } = this.state;
-    // TODO: change the video index
-    console.log(videoIdIndex);
+
     player.loadVideoById(videoId[videoIdIndex]);
-    console.log("changeVideoFunction: " + videoId[videoIdIndex]);
   };
 
   // Mute function - Handles button name, socket emit and mute/unmute player
@@ -105,16 +100,12 @@ export default class YoutubePlayer extends Component {
 
   render() {
     const { videoId, isMuted, isPlaying, videoIdIndex } = this.state;
+    //For autoplay add autoplay: 1 to opts
     const opts = { playerVars: { showinfo: 0, controls: 0, autohide: 1 } };
-    //autoplay: 1
     return (
       <div>
         <div className="youtube">
-          <YouTube
-            videoId={videoId[videoIdIndex]}
-            opts={opts}
-            onReady={this.onReady}
-          />
+          <YouTube videoId={videoId[0]} opts={opts} onReady={this.onReady} />
         </div>
         <br />
         <div className="youtube-container-button">

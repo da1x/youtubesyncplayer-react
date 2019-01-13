@@ -21,7 +21,6 @@ let connectedUsers = {};
 let communityChat = createChat();
 
 module.exports = function(socket) {
-  // console.log('\x1bc'); //clears console
   console.log("Socket Id:" + socket.id);
 
   let sendMessageToChatFromUser;
@@ -79,23 +78,27 @@ module.exports = function(socket) {
     sendTypingFromUser(chatId, isTyping);
   });
 
-  // Youtube Player
+  // Youtube Player Sockets
+  // Play/Pause
   socket.on(PLAY_STATE, isPlaying => {
     io.emit(PLAY_STATE, isPlaying);
     console.log("SocketManager - isPlaying: " + isPlaying);
   });
 
+  // Current video id
   socket.on(VIDEO_ID, videoIndex => {
     io.emit(VIDEO_ID, videoIndex);
     console.log("SocketManager - videoIndex" + videoIndex);
   });
 
+  // Mute/Unmute state
   socket.on(MUTE_STATE, isMuted => {
     io.emit(MUTE_STATE, isMuted);
     console.log("SocketManager - isMuted: " + isMuted);
   });
 };
 
+// Server side functions
 function sendTypingToChat(user) {
   return (chatId, isTyping) => {
     io.emit(`${TYPING}-${chatId}`, { user, isTyping });
